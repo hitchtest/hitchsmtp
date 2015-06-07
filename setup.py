@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*
 from setuptools import setup, find_packages
-import os
-import sys
-import re
 import codecs
+import sys
+import os
 
 
 def read(*parts):
@@ -19,8 +19,13 @@ setup(name="hitchsmtp",
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',
-          'License :: OSI Approved :: MIT License',
-          'Topic :: Software Development :: Build Tools',
+          'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+          'Topic :: Software Development :: Quality Assurance',
+          'Topic :: Software Development :: Testing',
+          'Topic :: Software Development :: Libraries',
+          'Operating System :: Unix',
+          'Environment :: Console',
+          'Topic :: Communications :: Email',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
@@ -29,12 +34,12 @@ setup(name="hitchsmtp",
 #          'Programming Language :: Python :: 3.2',
 #          'Programming Language :: Python :: 3.3',
       ],
-      keywords='development environment tool smtp mock testing server hitch',
+      keywords='hitch testing framework bdd tdd declarative tests testing smtp email mock server',
       author='Colm O\'Connor',
       author_email='colm.oconnor.github@gmail.com',
       url='https://hitch.readthedocs.org/',
-      license='MIT',
-      packages=find_packages(exclude=["contrib", "docs", "tests*"]),
+      license='AGPL',
+      packages=find_packages(exclude=["tests*",]),
       package_data={},
       entry_points=dict(console_scripts=['hitchsmtp=hitchsmtp:smtp.main', ]),
       zip_safe=False,
