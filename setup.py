@@ -42,5 +42,6 @@ setup(name="hitchsmtp",
       packages=find_packages(exclude=["tests*",]),
       package_data={},
       entry_points=dict(console_scripts=['hitchsmtp=hitchsmtp:smtp.main', ]),
+      install_requires=['hitchserve',],
       zip_safe=False,
 )

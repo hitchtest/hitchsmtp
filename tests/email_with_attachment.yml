@@ -1,0 +1,19 @@
+{% extends "base.yml" %}
+{% block test %}
+- engine: engine.py:HitchSMTPExecutionEngine
+  description: Check that links are parsed and return correctly.
+  preconditions:
+    python_version: "{{ python_version }}"
+  scenario:
+    - Send multipart mail:
+        Application: octet-stream
+        From address: Receiver <to@todomain.com>
+        To address: Sender <from@fromdomain.com>
+        Message:
+            From address: Receiver <to@todomain.com>
+            To address: Sender <from@fromdomain.com>
+            Subject: Email subject
+            Attachment: tests/attachment.txt
+    - Wait for email
+    - Check for attachment: tests/attachment.txt
+{% endblock %}

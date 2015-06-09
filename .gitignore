@@ -2,8 +2,8 @@ setup.cfg
 *.kate-swp
 *.pyc
 setup.cfg
+tests/.hitch
 build/
 dist/
-docs/html/
-venv/
+venv*/
 hitchsmtp.egg-info/

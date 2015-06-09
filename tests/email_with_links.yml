@@ -1,0 +1,25 @@
+{% extends "base.yml" %}
+{% block test %}
+- engine: engine.py:HitchSMTPExecutionEngine
+  description: Check that links are parsed and return correctly.
+  preconditions:
+    python_version: "{{ python_version }}"
+  scenario:
+    - Send mail:
+        From address: Receiver <to@todomain.com>
+        To address: Sender <from@fromdomain.com>
+        Body: |
+            From: Receiver <to@todomain.com>
+            To: Sender <from@fromdomain.com>
+            Subject: Test email for "HitchSMTP"
+
+            http://www.google.com
+            Another link: http://yahoo.com
+            Another link: https://www.google.com.sg/?gfe_rd=cr&ei=2X4mVebUFYTDuATVtoHoAQ#q=long+long+long+long+long+long+url
+    - Wait for email
+    - Check email property:
+        Links:
+            - http://www.google.com
+            - http://yahoo.com
+            - https://www.google.com.sg/?gfe_rd=cr&ei=2X4mVebUFYTDuATVtoHoAQ#q=long+long+long+long+long+long+url
+{% endblock %}

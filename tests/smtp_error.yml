@@ -1,0 +1,18 @@
+{% extends "base.yml" %}
+{% block test %}
+- engine: engine.py:HitchSMTPExecutionEngine
+  description: Test mock SMTP failures.
+  preconditions:
+    python_version: "{{ python_version }}"
+  scenario:
+    - Send mail:
+        To address: 421-excessive-amounts-of-data@smtperrors.com
+        From address: Receiver <to@todomain.com>
+        Body: |
+            From: Receiver <to@todomain.com>
+            To: Sender <from@fromdomain.com>
+            Subject: Test email for SaddleSMTP
+
+            Contents of simple email
+        Raises: smtplib.SMTPDataError
+{% endblock %}

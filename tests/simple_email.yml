@@ -1,0 +1,23 @@
+{% extends "base.yml" %}
+{% block test %}
+- engine: engine.py:HitchSMTPExecutionEngine
+  name: Send simple email with python {{ python_version }}
+  description: Send a simple email to HitchSMTP and check that it arrives.
+  preconditions:
+    python_version: "{{ python_version }}"
+  scenario:
+    - Send mail:
+        Host: localhost
+        Port: 10025
+        From address: Receiver <to@todomain.com>
+        To address: Sender <from@fromdomain.com>
+        Body: |
+            From: Receiver <to@todomain.com>
+            To: Sender <from@fromdomain.com>
+            Subject: Test email for SaddleSMTP
+
+            Contents of simple email
+    - Wait for email
+    - Check email property:
+        Subject: Test email for SaddleSMTP
+{% endblock %}
