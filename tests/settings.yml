@@ -5,3 +5,4 @@ startup_timeout: 2
 smtp_debug_messages: True
 python_versions:
   - 2.7
+  - 3.4

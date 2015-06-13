@@ -1,7 +1,7 @@
 {% extends "base.yml" %}
 {% block test %}
 - engine: engine.py:HitchSMTPExecutionEngine
-  description: Check that links are parsed and return correctly.
+  name: Check that links are parsed and return correctly in python {{ python_version }}
   preconditions:
     python_version: "{{ python_version }}"
   scenario:

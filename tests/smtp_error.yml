@@ -1,7 +1,7 @@
 {% extends "base.yml" %}
 {% block test %}
 - engine: engine.py:HitchSMTPExecutionEngine
-  description: Test mock SMTP failures.
+  name: Mock SMTP failure in python {{ python_version }}
   preconditions:
     python_version: "{{ python_version }}"
   scenario:
