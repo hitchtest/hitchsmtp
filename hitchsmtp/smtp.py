@@ -1,12 +1,12 @@
 """Mock SMTP Server."""
-import sys
-import smtpd
-import signal
-import email
-import json
+from hitchsmtp import smtperrors
 import asyncore
 import optparse
-import smtperrors
+import signal
+import email
+import smtpd
+import json
+import sys
 import re
 
 

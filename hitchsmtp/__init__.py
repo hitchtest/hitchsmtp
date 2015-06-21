@@ -1,3 +1,3 @@
-from service import HitchSMTPService
-from smtp import server
-from smtp import main
+from hitchsmtp.service import HitchSMTPService
+from hitchsmtp.smtp import server
+from hitchsmtp.smtp import main
