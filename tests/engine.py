@@ -1,19 +1,17 @@
-from hitchserve import ServiceBundle, Interactive, HitchTraceback, Service
+from hitchserve import ServiceBundle, Service
 from os import path, system, chdir
 from subprocess import call
 import hitchenvironment
+import hitchtest
 import unittest
 import os
 
 # Get directory above this file
 PROJECT_DIRECTORY = path.abspath(path.join(path.dirname(__file__), '..'))
 
-class HitchSMTPExecutionEngine(unittest.TestCase):
+class HitchSMTPExecutionEngine(hitchtest.ExecutionEngine):
     """Engine for orchestating and interacting with the reminders app."""
-    settings = {}
-    preconditions = {}
-
-    def setUp(self):
+    def set_up(self):
         """Ensure virtualenv present, then run all services."""
         chdir(PROJECT_DIRECTORY)
         venv_dir = os.path.join(PROJECT_DIRECTORY, "venv{}".format(
@@ -42,7 +40,7 @@ class HitchSMTPExecutionEngine(unittest.TestCase):
         )
 
         self.services['HitchSMTP'] = Service(
-            command=[venv_python, "-m", "hitchsmtp.smtp",],
+            command=[venv_python, "-u", "-m", "hitchsmtp.smtp",],
             log_line_ready_checker=lambda line: line == "SMTP Server running",
         )
 
@@ -52,23 +50,34 @@ class HitchSMTPExecutionEngine(unittest.TestCase):
         """Send email using standard libs."""
         import smtplib
         server = smtplib.SMTP(host=host, port=int(port))
-        server.set_debuglevel(bool(self.settings["smtp_debug_messages"]))
+        #server.set_debuglevel(bool(self.settings["smtp_debug_messages"])) # Doesn't seem to work in python 3
         if raises is None:
             server.sendmail(from_address, [to_address], body)
+            server.quit()
         else:
-            exec("smtperror = {}".format(raises))
-            self.assertRaises(smtperror, server.sendmail, from_address, [to_address], body)
-        server.quit()
+            error = None
+            try:
+                server.sendmail(from_address, [to_address], body)
+            except Exception as e:
+                error = e
+            assert type(error) == eval(raises)
 
     def send_multipart_mail(self, port="10025", application="octet-stream", from_address="", to_address="", message=None):
         import smtplib
-        from email import Encoders
-        from email.MIMEBase import MIMEBase
-        from email.MIMEMultipart import MIMEMultipart
-        from email.Utils import formatdate
+        import sys
+        if sys.version_info[0] >= 3:
+            from email import encoders
+            from email.mime.base import MIMEBase
+            from email.mime.multipart import MIMEMultipart
+            from email.utils import formatdate
+        else:
+            from email import Encoders as encoders
+            from email.MIMEBase import MIMEBase
+            from email.MIMEMultipart import MIMEMultipart
+            from email.Utils import formatdate
 
         server = smtplib.SMTP(host="localhost", port=int(port))
-        server.set_debuglevel(bool(self.settings["smtp_debug_messages"]))
+        #server.set_debuglevel(bool(self.settings["smtp_debug_messages"]))
 
         msg = MIMEMultipart()
         msg["From"] = from_address
@@ -82,7 +91,7 @@ class HitchSMTPExecutionEngine(unittest.TestCase):
         # Attach the file
         part = MIMEBase('application', application)
         part.set_payload(payload)
-        Encoders.encode_base64(part)
+        encoders.encode_base64(part)
         part.add_header(
             'Content-Disposition',
             'attachment; filename="{0}"'.format(os.path.basename(message['Attachment']))
@@ -95,7 +104,7 @@ class HitchSMTPExecutionEngine(unittest.TestCase):
     def check_for_attachment(self, filename):
         with open(filename, "rb") as payload_h:
             payload = payload_h.read()
-        self.assertEquals(self.received_email['payload'][0]['content'], payload)
+        assert self.received_email['payload'][0]['content'] == payload.decode('utf-8')
 
     def wait_for_email(self):
         self.received_email = self.services['HitchSMTP'].logs.out.tail.until_json(
@@ -106,9 +115,23 @@ class HitchSMTPExecutionEngine(unittest.TestCase):
 
     def check_email_property(self, **kwargs):
         for key, value in kwargs.items():
-            self.assertEquals(self.received_email[key], value)
+            assert self.received_email[key] == value
 
-    def tearDown(self):
+    def pause(self, message=None):
+        """Stop. IPython time."""
+        if hasattr(self, 'services'):
+            self.services.start_interactive_mode()
+        hitchtest.ipython_embed(message)
+        if hasattr(self, 'services'):
+            self.services.stop_interactive_mode()
+
+    def on_failure(self, stacktrace):
+        self.stacktrace = stacktrace
+        self.pause(message=stacktrace.to_template())
+        #self.services.log(stacktrace.to_template().encode('UTF-8'))
+        pass
+
+    def tear_down(self):
         """We're done here."""
         if hasattr(self, 'services'):
             self.services.shutdown()
