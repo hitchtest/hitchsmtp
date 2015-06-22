@@ -10,6 +10,12 @@ import sys
 import re
 
 
+if sys.version_info[0] >= 3:
+    from email.parser import Parser
+else:
+    from email.Parser import Parser
+
+
 class MockSMTPServer(smtpd.SMTPServer):
     """Mock SMTP server."""
     def __init__(*args, **kwargs):
@@ -17,7 +23,7 @@ class MockSMTPServer(smtpd.SMTPServer):
 
     def process_message(self, host, email_from, email_to, data):
         """Parse SMTP message and log it to the console as JSON."""
-        parsed_message = email.Parser.Parser().parsestr(data)
+        parsed_message = Parser().parsestr(data)
         links_regex = re.compile(r"(https?://\S+)")
 
         if parsed_message.is_multipart():
@@ -26,8 +32,8 @@ class MockSMTPServer(smtpd.SMTPServer):
             for message in parsed_message.get_payload():
                 payload_dict = dict(message)
                 payload_dict['filename'] = message.get_filename()
-                payload_dict['content'] = message.get_payload(decode=True)
-                payload_dict['links'] = re.findall(links_regex, message.get_payload(decode=True))
+                payload_dict['content'] = message.get_payload(decode=True).decode("utf-8")
+                payload_dict['links'] = re.findall(links_regex, message.get_payload(decode=True).decode("utf-8"))
                 links = links + payload_dict['links']
                 payload.append(payload_dict)
         else:
