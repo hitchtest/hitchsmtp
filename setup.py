@@ -13,7 +13,7 @@ def read(*parts):
 long_description = read('README.rst')
 
 setup(name="hitchsmtp",
-      version="0.2",
+      version="0.2.1",
       description="Mock SMTP server that logs incoming messages to stdout as JSON for easy parsing and testing by the hitch framework.",
       long_description=long_description,
       classifiers=[
