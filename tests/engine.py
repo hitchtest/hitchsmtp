@@ -1,8 +1,8 @@
 from hitchserve import ServiceBundle, Service
 from os import path, system, chdir
 from subprocess import call
-import hitchenvironment
 import hitchtest
+import hitchpython
 import unittest
 import os
 
@@ -13,24 +13,19 @@ class HitchSMTPExecutionEngine(hitchtest.ExecutionEngine):
     """Engine for orchestating and interacting with the reminders app."""
     def set_up(self):
         """Ensure virtualenv present, then run all services."""
-        chdir(PROJECT_DIRECTORY)
-        venv_dir = os.path.join(PROJECT_DIRECTORY, "venv{}".format(
-            self.preconditions['python_version'])
+        python_package = hitchpython.PythonPackage(
+            python_version=self.preconditions['python_version'],
+            directory=path.join(
+                PROJECT_DIRECTORY, "pyv{}".format(self.preconditions['python_version'])
+            )
         )
-        if not path.exists(venv_dir):
-            call([
-                    "virtualenv", "--no-site-packages", "--distribute",
-                    "-p", "/usr/bin/python{}".format(self.preconditions['python_version']),
-                    venv_dir,
-                ])
+        python_package.build()
+        python_package.verify()
 
-        venv_python = os.path.join(venv_dir, "bin", "python")
-        call([venv_python, "setup.py", "install", ])
-        environment = hitchenvironment.Environment(
-            self.settings["platform"],
-            self.settings["systembits"],
-            self.settings["requires_internet"],
-        )
+        call([
+            python_package.pip, "install", "-r",
+            path.join(PROJECT_DIRECTORY, "requirements.txt")
+        ])
 
         self.services = ServiceBundle(
             project_directory=PROJECT_DIRECTORY,
@@ -40,7 +35,7 @@ class HitchSMTPExecutionEngine(hitchtest.ExecutionEngine):
         )
 
         self.services['HitchSMTP'] = Service(
-            command=[venv_python, "-u", "-m", "hitchsmtp.smtp",],
+            command=[python_package.python, "-u", "-m", "hitchsmtp.smtp",],
             log_line_ready_checker=lambda line: line == "SMTP Server running",
         )
 
