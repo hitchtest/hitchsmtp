@@ -6,4 +6,5 @@ tests/.hitch
 build/
 dist/
 venv*/
+pyv*/
 hitchsmtp.egg-info/

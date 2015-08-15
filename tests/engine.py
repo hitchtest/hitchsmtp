@@ -21,15 +21,12 @@ class HitchSMTPExecutionEngine(hitchtest.ExecutionEngine):
         )
         python_package.build()
         python_package.verify()
+        os.chdir(PROJECT_DIRECTORY)
+        call([python_package.python, "setup.py", "install"])
 
-        call([
-            python_package.pip, "install", "-r",
-            path.join(PROJECT_DIRECTORY, "requirements.txt")
-        ])
 
         self.services = ServiceBundle(
             project_directory=PROJECT_DIRECTORY,
-            environment=environment,
             startup_timeout=float(self.settings["startup_timeout"]),
             shutdown_timeout=1.0,
         )
@@ -120,9 +117,8 @@ class HitchSMTPExecutionEngine(hitchtest.ExecutionEngine):
         if hasattr(self, 'services'):
             self.services.stop_interactive_mode()
 
-    def on_failure(self, stacktrace):
-        self.stacktrace = stacktrace
-        self.pause(message=stacktrace.to_template())
+    def on_failure(self):
+        self.pause(message=self.stacktrace.to_template())
         #self.services.log(stacktrace.to_template().encode('UTF-8'))
         pass
 

@@ -3,5 +3,5 @@ platform: linux
 requires_internet: False
 startup_timeout: 2
 python_versions:
-  - 2.7
-  - 3.4
+  - 2.7.10
+  - 3.4.3
